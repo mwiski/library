@@ -1,11 +1,10 @@
 package com.kodilla.library.domain;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.DynamicUpdate;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -19,7 +18,6 @@ import java.util.List;
 @Access(AccessType.FIELD)
 @Entity()
 @Table(name = "borrowers")
-@DynamicUpdate
 public class Borrower {
 
     @Id
@@ -46,7 +44,7 @@ public class Borrower {
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY
     )
-    @JsonManagedReference
+    @JsonIgnore
     private List<Borrowing> borrowings = new ArrayList<>();
 
     public Borrower(String firstName, String lastName, LocalDate accountCreationDate) {

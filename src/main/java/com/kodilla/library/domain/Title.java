@@ -1,15 +1,15 @@
 package com.kodilla.library.domain;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.DynamicUpdate;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,7 +18,6 @@ import java.util.List;
 @Access(AccessType.FIELD)
 @Entity
 @Table(name = "titles")
-@DynamicUpdate
 public class Title {
 
     @Id
@@ -45,7 +44,7 @@ public class Title {
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY
     )
-    @JsonManagedReference
+    @JsonIgnore
     private List<BookCopy> copies = new ArrayList<>();
 
     public Title(String title, String author, int yearOfPublication) {
@@ -56,5 +55,20 @@ public class Title {
 
     public void addBookCopy(BookCopy bookCopy) {
         copies.add(bookCopy);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Title)) return false;
+        Title title1 = (Title) o;
+        return yearOfPublication == title1.yearOfPublication &&
+                title.equals(title1.title) &&
+                author.equals(title1.author);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, author, yearOfPublication);
     }
 }

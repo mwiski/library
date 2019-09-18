@@ -1,12 +1,10 @@
 package com.kodilla.library.domain;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.DynamicUpdate;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -23,7 +21,6 @@ import java.util.List;
 @Access(AccessType.FIELD)
 @Entity
 @Table(name = "books_copies")
-@DynamicUpdate
 public class BookCopy {
 
     @Id
@@ -35,7 +32,6 @@ public class BookCopy {
     @ManyToOne
     @NotNull
     @JoinColumn(name = "title_id")
-    @JsonBackReference
     private Title titleId;
 
     @Column(name = "status")
@@ -47,7 +43,7 @@ public class BookCopy {
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY
     )
-    @JsonManagedReference
+    @JsonIgnore
     private List<Borrowing> borrowings = new ArrayList<>();
 
     public BookCopy(String status) {

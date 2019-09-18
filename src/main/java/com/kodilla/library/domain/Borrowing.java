@@ -1,11 +1,9 @@
 package com.kodilla.library.domain;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.DynamicUpdate;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -17,7 +15,6 @@ import java.time.LocalDate;
 @Access(AccessType.FIELD)
 @Entity
 @Table(name = "borrowings")
-@DynamicUpdate
 public class Borrowing {
 
     @Id
@@ -29,13 +26,11 @@ public class Borrowing {
     @ManyToOne
     @NotNull
     @JoinColumn(name = "book_copy_id")
-    @JsonBackReference
     private BookCopy bookCopyId;
 
     @ManyToOne
     @NotNull
     @JoinColumn(name = "borrower_id")
-    @JsonBackReference
     private Borrower borrowerId;
 
     @NotNull
