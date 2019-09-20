@@ -9,7 +9,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -39,13 +38,13 @@ public class Title {
     private int yearOfPublication;
 
     @OneToMany(
-            targetEntity = BookCopy.class,
-            mappedBy = "titleId",
+            targetEntity = Exemplar.class,
+            mappedBy = "title",
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY
     )
     @JsonIgnore
-    private List<BookCopy> copies = new ArrayList<>();
+    private List<Exemplar> exemplars = new ArrayList<>();
 
     public Title(String title, String author, int yearOfPublication) {
         this.title = title;
@@ -53,22 +52,7 @@ public class Title {
         this.yearOfPublication = yearOfPublication;
     }
 
-    public void addBookCopy(BookCopy bookCopy) {
-        copies.add(bookCopy);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Title)) return false;
-        Title title1 = (Title) o;
-        return yearOfPublication == title1.yearOfPublication &&
-                title.equals(title1.title) &&
-                author.equals(title1.author);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(title, author, yearOfPublication);
+    public void addExemplar(Exemplar exemplar) {
+        exemplars.add(exemplar);
     }
 }

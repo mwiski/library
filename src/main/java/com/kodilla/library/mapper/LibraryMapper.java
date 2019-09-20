@@ -2,7 +2,9 @@ package com.kodilla.library.mapper;
 
 import com.kodilla.library.domain.*;
 import org.springframework.stereotype.Component;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
@@ -14,7 +16,7 @@ public class LibraryMapper {
                 borrowerDto.getFirstName(),
                 borrowerDto.getLastName(),
                 borrowerDto.getAccountCreationDate(),
-                borrowerDto.getBorrowings()
+                mapToBorrowingList(borrowerDto.getBorrowings())
         );
     }
 
@@ -24,7 +26,7 @@ public class LibraryMapper {
                 borrower.getFirstName(),
                 borrower.getLastName(),
                 borrower.getAccountCreationDate(),
-                borrower.getBorrowings()
+                mapToBorrowingDtoList(borrower.getBorrowings())
         );
     }
 
@@ -34,7 +36,7 @@ public class LibraryMapper {
                 title.getTitle(),
                 title.getAuthor(),
                 title.getYearOfPublication(),
-                title.getCopies()
+                mapToExemplarDtoList(title.getExemplars())
         );
     }
 
@@ -44,50 +46,57 @@ public class LibraryMapper {
                 titleDto.getTitle(),
                 titleDto.getAuthor(),
                 titleDto.getYearOfPublication(),
-                titleDto.getCopies()
+                mapToExemplarList(titleDto.getExemplars())
         );
     }
 
-    public BookCopyDto mapToBookCopyDto(final BookCopy bookCopy) {
-        return new BookCopyDto(
-                bookCopy.getId(),
-                bookCopy.getTitleId(),
-                bookCopy.getStatus(),
-                bookCopy.getBorrowings()
+    public ExemplarDto mapToExemplarDto(final Exemplar exemplar) {
+        return new ExemplarDto(
+                exemplar.getId(),
+                exemplar.getTitle(),
+                exemplar.getStatus(),
+                mapToBorrowingDtoList(exemplar.getBorrowings())
         );
     }
 
     public BorrowingDto mapToBorrowingDto(final Borrowing borrowing) {
         return new BorrowingDto(
                 borrowing.getId(),
-                borrowing.getBookCopyId(),
-                borrowing.getBorrowerId(),
+                borrowing.getExemplar(),
+                borrowing.getBorrower(),
                 borrowing.getBorrowDate(),
                 borrowing.getReturnDate()
         );
     }
 
-    public List<BorrowerDto> mapToBorrowerDtoList(final List<Borrower> borrowers) {
-        return borrowers.stream()
-                .map(b -> new BorrowerDto(b.getId(), b.getFirstName(), b.getLastName(), b.getAccountCreationDate(), b.getBorrowings()))
+    private static <E, D> List<D> getConvertedList(Collection<E> entityList, Function<E, D> convertFunction) {
+        if (entityList == null) return null;
+        return entityList.stream()
+                .map(convertFunction)
                 .collect(Collectors.toList());
+    }
+
+    public List<BorrowerDto> mapToBorrowerDtoList(final List<Borrower> borrowers) {
+        return getConvertedList(borrowers, b -> new BorrowerDto(b.getId(), b.getFirstName(), b.getLastName(), b.getAccountCreationDate(), mapToBorrowingDtoList(b.getBorrowings())));
     }
 
     public List<TitleDto> mapToTitleDtoList(final List<Title> titles) {
-        return titles.stream()
-                .map(t -> new TitleDto(t.getId(), t.getTitle(), t.getAuthor(), t.getYearOfPublication(), t.getCopies()))
-                .collect(Collectors.toList());
+        return getConvertedList(titles, t -> new TitleDto(t.getId(), t.getTitle(), t.getAuthor(), t.getYearOfPublication(), mapToExemplarDtoList(t.getExemplars())));
     }
 
-    public List<BookCopyDto> mapToBookCopyDtoList(final List<BookCopy> copies) {
-        return copies.stream()
-                .map(b -> new BookCopyDto(b.getId(), b.getTitleId(), b.getStatus(), b.getBorrowings()))
-                .collect(Collectors.toList());
+    public List<ExemplarDto> mapToExemplarDtoList(final List<Exemplar> exemplars) {
+        return getConvertedList(exemplars, e -> new ExemplarDto(e.getId(), e.getTitle(), e.getStatus(), mapToBorrowingDtoList(e.getBorrowings())));
+    }
+
+    public List<Exemplar> mapToExemplarList(final List<ExemplarDto> exemplars) {
+        return getConvertedList(exemplars, e -> new Exemplar(e.getId(), e.getTitle(), e.getStatus(), mapToBorrowingList(e.getBorrowings())));
     }
 
     public List<BorrowingDto> mapToBorrowingDtoList(final List<Borrowing> borrowings) {
-        return borrowings.stream()
-                .map(b -> new BorrowingDto(b.getId(), b.getBookCopyId(), b.getBorrowerId(), b.getBorrowDate(), b.getReturnDate()))
-                .collect(Collectors.toList());
+        return getConvertedList(borrowings, b -> new BorrowingDto(b.getId(), b.getExemplar(), b.getBorrower(), b.getBorrowDate(), b.getReturnDate()));
+    }
+
+    public List<Borrowing> mapToBorrowingList(final List<BorrowingDto> borrowings) {
+        return getConvertedList(borrowings, b -> new Borrowing(b.getId(), b.getExemplar(), b.getBorrower(), b.getBorrowDate(), b.getReturnDate()));
     }
 }

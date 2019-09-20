@@ -16,39 +16,39 @@ public class LibraryController {
     @Autowired
     private DbService service;
 
-    @RequestMapping(method = RequestMethod.POST, value = "borrower/add", consumes = APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.POST, value = "borrower", consumes = APPLICATION_JSON_VALUE)
     public BorrowerDto addBorrower(@RequestBody BorrowerDto borrowerDto) throws CannotPerformActionException {
-        return service.saveBorrower(borrowerDto);
+        return service.addBorrower(borrowerDto);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "title/add", consumes = APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.POST, value = "book/title", consumes = APPLICATION_JSON_VALUE)
     public TitleDto addTitle(@RequestBody TitleDto titleDto) throws CannotPerformActionException {
-        return service.saveTitle(titleDto);
+        return service.addTitle(titleDto);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "book/copy/add", consumes = APPLICATION_JSON_VALUE)
-    public BookCopyDto addBookCopy(@RequestParam Long titleId, @RequestParam String status) throws CannotPerformActionException {
-        return service.saveBookCopy(titleId, status);
+    @RequestMapping(method = RequestMethod.POST, value = "book/exemplar", consumes = APPLICATION_JSON_VALUE)
+    public ExemplarDto addExemplar(@RequestParam Long titleId, @RequestParam Status status) throws CannotPerformActionException {
+        return service.addExemplar(titleId, status);
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "status/change")
-    public BookCopyDto changeBookCopyStatus(@RequestParam Long id, @RequestParam String status) throws CannotPerformActionException {
-        return service.updateBookCopyStatus(id, status);
+    @RequestMapping(method = RequestMethod.PUT, value = "book/exemplar/status")
+    public ExemplarDto updateExemplarStatus(@RequestParam Long id, @RequestParam Status status) throws CannotPerformActionException {
+        return service.updateExemplarStatus(id, status);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "copies/available")
-    public int getAvailableBookCopiesNumber(@RequestParam Long titleId) throws CannotPerformActionException {
-        return service.getAvailableBookCopiesNumber(titleId);
+    @RequestMapping(method = RequestMethod.GET, value = "book/exemplars")
+    public long getAvailableExemplars(@RequestParam Long titleId) throws CannotPerformActionException {
+        return service.getAvailableExemplars(titleId);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "book/borrow")
-    public BorrowingDto borrowBook(@RequestParam Long bookCopyId, @RequestParam Long borrowerId, @RequestParam String borrowDate) throws CannotPerformActionException {
-        return service.borrowBook(bookCopyId, borrowerId, borrowDate);
+    public BorrowingDto borrowBook(@RequestParam Long exemplarId, @RequestParam Long borrowerId, @RequestParam String borrowDate) throws CannotPerformActionException {
+        return service.borrowBook(exemplarId, borrowerId, borrowDate);
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "book/return")
-    public BorrowingDto returnBook(@RequestParam Long bookCopyId, @RequestParam String returnDate) throws CannotPerformActionException {
-        return service.returnBook(bookCopyId, returnDate);
+    public BorrowingDto returnBook(@RequestParam Long exemplarId, @RequestParam String returnDate) throws CannotPerformActionException {
+        return service.returnBook(exemplarId, returnDate);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "borrowers")
@@ -56,17 +56,17 @@ public class LibraryController {
         return service.getBorrowers();
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "titles")
+    @RequestMapping(method = RequestMethod.GET, value = "book/titles")
     public List<TitleDto> getTitles() {
         return service.getTitles();
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "books/copies")
-    public List<BookCopyDto> getBooksCopies() {
-        return service.getBooksCopies();
+    @RequestMapping(method = RequestMethod.GET, value = "books/exemplars")
+    public List<ExemplarDto> getExemplars() {
+        return service.getExemplars();
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "borrowings")
+    @RequestMapping(method = RequestMethod.GET, value = "book/borrowings")
     public List<BorrowingDto> getBorrowings() {
         return service.getBorrowings();
     }

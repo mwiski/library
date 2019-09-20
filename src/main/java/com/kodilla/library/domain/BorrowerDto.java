@@ -18,5 +18,5 @@ public class BorrowerDto {
     private String firstName;
     private String lastName;
     private LocalDate accountCreationDate;
-    private List<Borrowing> borrowings = new ArrayList<>();
+    private List<BorrowingDto> borrowings = new ArrayList<>();
 }

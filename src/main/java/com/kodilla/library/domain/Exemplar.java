@@ -10,18 +10,14 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-@NamedQuery(
-        name = "BookCopy.retrieveBookCopiesWithStatus",
-        query = "FROM BookCopy WHERE status LIKE :available AND title_id = :title"
-)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Access(AccessType.FIELD)
 @Entity
-@Table(name = "books_copies")
-public class BookCopy {
+@Table(name = "exemplars")
+public class Exemplar {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,21 +28,21 @@ public class BookCopy {
     @ManyToOne
     @NotNull
     @JoinColumn(name = "title_id")
-    private Title titleId;
+    private Title title;
 
     @Column(name = "status")
-    private String status;
+    private Status status;
 
     @OneToMany(
             targetEntity = Borrowing.class,
-            mappedBy = "bookCopyId",
+            mappedBy = "exemplar",
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY
     )
     @JsonIgnore
     private List<Borrowing> borrowings = new ArrayList<>();
 
-    public BookCopy(String status) {
+    public Exemplar(Status status) {
         this.status = status;
     }
 

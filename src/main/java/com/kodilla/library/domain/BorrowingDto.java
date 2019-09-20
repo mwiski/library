@@ -13,8 +13,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class BorrowingDto {
     private long id;
-    private BookCopy bookCopyId;
-    private Borrower borrowerId;
+    private Exemplar exemplar;
+    private Borrower borrower;
     private LocalDate borrowDate;
     private LocalDate returnDate;
 }

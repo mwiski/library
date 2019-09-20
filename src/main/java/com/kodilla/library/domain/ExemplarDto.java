@@ -12,9 +12,9 @@ import java.util.List;
 @Access(AccessType.FIELD)
 @AllArgsConstructor
 @NoArgsConstructor
-public class BookCopyDto {
+public class ExemplarDto {
     private long id;
-    private Title titleId;
-    private String status;
-    private List<Borrowing> borrowings = new ArrayList<>();
+    private Title title;
+    private Status status;
+    private List<BorrowingDto> borrowings = new ArrayList<>();
 }

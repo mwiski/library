@@ -3,7 +3,7 @@ package com.kodilla.library.service;
 import com.kodilla.library.controller.CannotPerformActionException;
 import com.kodilla.library.domain.*;
 import com.kodilla.library.mapper.LibraryMapper;
-import com.kodilla.library.repository.BookCopyRepository;
+import com.kodilla.library.repository.ExemplarRepository;
 import com.kodilla.library.repository.BorrowerRepository;
 import com.kodilla.library.repository.BorrowingRepository;
 import com.kodilla.library.repository.TitleRepository;
@@ -25,62 +25,63 @@ public class DbService {
     @Autowired
     private TitleRepository titleRepository;
     @Autowired
-    private BookCopyRepository bookCopyRepository;
+    private ExemplarRepository exemplarRepository;
 
-    public BorrowerDto saveBorrower(final BorrowerDto borrowerDto) {
+    public BorrowerDto addBorrower(final BorrowerDto borrowerDto) {
         return libraryMapper.mapToBorrowerDto(borrowerRepository.save(libraryMapper.mapToBorrower(borrowerDto)));
     }
 
-    public TitleDto saveTitle(final TitleDto titleDto) throws CannotPerformActionException {
-        Title title = libraryMapper.mapToTitle(titleDto);
-        if (titleRepository.findAll().stream().anyMatch(t -> t.equals(title))) {
+    public TitleDto addTitle(final TitleDto titleDto) throws CannotPerformActionException {
+        if (titleRepository.findAll().stream()
+                .anyMatch(t -> t.getTitle().equals(titleDto.getTitle()) && t.getAuthor().equals(titleDto.getAuthor()) && t.getYearOfPublication() == titleDto.getYearOfPublication()))
+        {
             throw new CannotPerformActionException("This title is already in database");
         }
         return libraryMapper.mapToTitleDto(titleRepository.save(libraryMapper.mapToTitle(titleDto)));
     }
 
-    public BookCopyDto saveBookCopy(final Long titleId, final String status) throws CannotPerformActionException {
-        BookCopy bookCopy = new BookCopy(status);
-        bookCopy.setTitleId(titleRepository.findById(titleId).orElseThrow(() -> new CannotPerformActionException("Cannot find this title in database")));
-        bookCopy.getTitleId().addBookCopy(bookCopy);
-        return libraryMapper.mapToBookCopyDto(bookCopyRepository.save(bookCopy));
+    public ExemplarDto addExemplar(final Long titleId, final Status status) throws CannotPerformActionException {
+        Exemplar exemplar = new Exemplar(status);
+        exemplar.setTitle(titleRepository.findById(titleId).orElseThrow(() -> new CannotPerformActionException("Cannot find this title in database")));
+        exemplar.getTitle().addExemplar(exemplar);
+        return libraryMapper.mapToExemplarDto(exemplarRepository.save(exemplar));
     }
 
-    public BookCopyDto updateBookCopyStatus(final Long id, final String status) throws CannotPerformActionException {
-        BookCopy bookCopy = bookCopyRepository.findById(id)
-                .orElseThrow(() -> new CannotPerformActionException("Cannot find this book copy in database"));
-        bookCopy.setStatus(status);
-        return libraryMapper.mapToBookCopyDto(bookCopyRepository.save(bookCopy));
+    public ExemplarDto updateExemplarStatus(final Long id, final Status status) throws CannotPerformActionException {
+        Exemplar exemplar = exemplarRepository.findById(id)
+                .orElseThrow(() -> new CannotPerformActionException("Cannot find this exemplar in database"));
+        exemplar.setStatus(status);
+        return libraryMapper.mapToExemplarDto(exemplarRepository.save(exemplar));
     }
 
-    public int getAvailableBookCopiesNumber(final Long titleId) throws CannotPerformActionException {
+    public long getAvailableExemplars(final Long titleId) throws CannotPerformActionException {
         Title title = titleRepository.findById(titleId).orElseThrow(() -> new CannotPerformActionException("Cannot find this title in database"));
-        return bookCopyRepository.retrieveBookCopiesWithStatus("available", title).size();
+        return exemplarRepository.countAllByStatusAndTitle(Status.AVAILABLE, title);
     }
 
-    public BorrowingDto borrowBook(final Long bookCopyId, final Long borrowerId, final String borrowDate) throws CannotPerformActionException {
-        BookCopy bookCopy = bookCopyRepository.findById(bookCopyId).orElseThrow(() -> new CannotPerformActionException("Cannot find this book copy in database"));
+    public BorrowingDto borrowBook(final Long exemplarId, final Long borrowerId, final String borrowDate) throws CannotPerformActionException {
+        Exemplar exemplar = exemplarRepository.findById(exemplarId).orElseThrow(() -> new CannotPerformActionException("Cannot find this exemplar in database"));
         Borrower borrower = borrowerRepository.findById(borrowerId).orElseThrow(() -> new CannotPerformActionException("Cannot find this borrower in database"));
-        if (bookCopy.getStatus().equals("available")) {
+        if (exemplar.getStatus().equals(Status.AVAILABLE)) {
             LocalDate localDate = LocalDate.parse(borrowDate);
             Borrowing borrowing = new Borrowing(localDate);
-            borrowing.setBookCopyId(bookCopy);
-            borrowing.setBorrowerId(borrower);
-            bookCopy.addBorrowing(borrowing);
+            borrowing.setExemplar(exemplar);
+            borrowing.setBorrower(borrower);
+            exemplar.addBorrowing(borrowing);
             borrower.addBorrowing(borrowing);
-            bookCopy.setStatus("borrowed");
+            exemplar.setStatus(Status.BORROWED);
             return libraryMapper.mapToBorrowingDto(borrowingRepository.save(borrowing));
         } else {
-            throw new CannotPerformActionException("This book copy is not available to be borrowed");
+            throw new CannotPerformActionException("This exemplar is not available to be borrowed");
         }
     }
 
-    public BorrowingDto returnBook(final Long bookCopyId, final String returnDate) throws CannotPerformActionException {
-        BookCopy bookCopy = bookCopyRepository.findById(bookCopyId).orElseThrow(() -> new CannotPerformActionException("Cannot find this book copy in database"));
+    public BorrowingDto returnBook(final Long exemplarId, final String returnDate) throws CannotPerformActionException {
+        Exemplar exemplar = exemplarRepository.findById(exemplarId).orElseThrow(() -> new CannotPerformActionException("Cannot find this exemplar in database"));
         LocalDate localDate = LocalDate.parse(returnDate);
-        bookCopy.setStatus("available");
-        Borrowing borrowing = Optional.ofNullable(bookCopy.getBorrowings()
-                .get(bookCopy.getBorrowings().size() - 1))
+        exemplar.setStatus(Status.AVAILABLE);
+        Borrowing borrowing = Optional.ofNullable(exemplar.getBorrowings()
+                .get(exemplar.getBorrowings().size() - 1))
                 .orElseThrow(() -> new CannotPerformActionException("Cannot find this book borrowing"));
         borrowing.setReturnDate(localDate);
         return libraryMapper.mapToBorrowingDto(borrowingRepository.save(borrowing));
@@ -94,8 +95,8 @@ public class DbService {
         return libraryMapper.mapToTitleDtoList(titleRepository.findAll());
     }
 
-    public List<BookCopyDto> getBooksCopies() {
-        return libraryMapper.mapToBookCopyDtoList(bookCopyRepository.findAll());
+    public List<ExemplarDto> getExemplars() {
+        return libraryMapper.mapToExemplarDtoList(exemplarRepository.findAll());
     }
 
     public List<BorrowingDto> getBorrowings() {

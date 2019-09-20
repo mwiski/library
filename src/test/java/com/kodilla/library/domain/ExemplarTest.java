@@ -1,6 +1,6 @@
 package com.kodilla.library.domain;
 
-import com.kodilla.library.repository.BookCopyRepository;
+import com.kodilla.library.repository.ExemplarRepository;
 import com.kodilla.library.repository.TitleRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,57 +12,57 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class BookCopyTest {
+public class ExemplarTest {
 
     @Autowired
-    BookCopyRepository bookCopyRepository;
+    ExemplarRepository exemplarRepository;
     @Autowired
     TitleRepository titleRepository;
 
     @Test
-    public void testUpdateBookCopyStatus() {
+    public void testUpdateExemplarStatus() {
         //Given
         Title title = new Title("Pan Tadeusz", "Adam Mickiewicz", 1834);
         titleRepository.save(title);
-        BookCopy bookCopy = new BookCopy("renewed");
-        bookCopy.setTitleId(title);
-        title.addBookCopy(bookCopy);
-        bookCopyRepository.save(bookCopy);
+        Exemplar exemplar = new Exemplar(Status.DAMAGED);
+        exemplar.setTitle(title);
+        title.addExemplar(exemplar);
+        exemplarRepository.save(exemplar);
 
         //When
-        bookCopy.setStatus("test");
-        bookCopyRepository.save(bookCopy);
+        exemplar.setStatus(Status.BORROWED);
+        exemplarRepository.save(exemplar);
 
         //Then
-        assertThat(bookCopy.getStatus()).isEqualTo("test");
+        assertThat(exemplar.getStatus()).isEqualTo(Status.BORROWED);
 
         //CleanUp
         try {
-            bookCopyRepository.deleteById(bookCopy.getId());
+            exemplarRepository.deleteById(exemplar.getId());
         } catch (Exception e) {
             //    do nothing
         }
     }
 
     @Test
-    public void testRetrieveAvailableBookCopies() {
+    public void testRetrieveAvailableExemplars() {
         //Given
         Title title = new Title("Pan Tadeusz", "Adam Mickiewicz", 1834);
         titleRepository.save(title);
-        BookCopy bookCopy = new BookCopy("available");
-        bookCopy.setTitleId(title);
-        title.addBookCopy(bookCopy);
-        bookCopyRepository.save(bookCopy);
+        Exemplar exemplar = new Exemplar(Status.AVAILABLE);
+        exemplar.setTitle(title);
+        title.addExemplar(exemplar);
+        exemplarRepository.save(exemplar);
 
         //When
-        List<BookCopy> availableCopies = bookCopyRepository.retrieveBookCopiesWithStatus("available", title);
+        Long availableExemplarsNumber = exemplarRepository.countAllByStatusAndTitle(Status.AVAILABLE, title);
 
         //Then
-        assertThat(availableCopies.size()).isEqualTo(1);
+        assertThat(availableExemplarsNumber).isEqualTo(1);
 
         //CleanUp
         try {
-            bookCopyRepository.deleteById(bookCopy.getId());
+            exemplarRepository.deleteById(exemplar.getId());
         } catch (Exception e) {
             //    do nothing
         }

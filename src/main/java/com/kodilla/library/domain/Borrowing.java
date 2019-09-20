@@ -25,13 +25,13 @@ public class Borrowing {
 
     @ManyToOne
     @NotNull
-    @JoinColumn(name = "book_copy_id")
-    private BookCopy bookCopyId;
+    @JoinColumn(name = "exemplar_id")
+    private Exemplar exemplar;
 
     @ManyToOne
     @NotNull
     @JoinColumn(name = "borrower_id")
-    private Borrower borrowerId;
+    private Borrower borrower;
 
     @NotNull
     @Column(name = "borrow_date")

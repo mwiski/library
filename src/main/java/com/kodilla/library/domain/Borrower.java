@@ -40,7 +40,7 @@ public class Borrower {
 
     @OneToMany(
             targetEntity = Borrowing.class,
-            mappedBy = "borrowerId",
+            mappedBy = "borrower",
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY
     )
